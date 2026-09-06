@@ -1,0 +1,19 @@
+# Java compilation output
+*.class
+
+# BlueJ generated context and compatibility files
+*.ctxt
+bluej.pkg
+
+# Operating-system files
+.DS_Store
+Thumbs.db
+
+# IDE folders
+.idea/
+.vscode/
+
+# Temporary files and packaged copies
+*.tmp
+*.bak
+slotMachine.zip
