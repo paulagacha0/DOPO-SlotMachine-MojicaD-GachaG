@@ -1,14 +1,5 @@
 import java.util.ArrayList;
 import javax.swing.JOptionPane;
-
-/**
- * Models a slot machine whose wheels share the same ordered symbol catalog.
- * Public wheel positions are one-based, while internal list indexes are
- * zero-based.
- *
- * @author Paula Gacha and Diego Mojica
- * @version Cycle 2 complete implementation
- */
 public class SlotMachine
 {
     private static final int FIRST_WHEEL_X = 30;
@@ -21,10 +12,6 @@ public class SlotMachine
     private boolean isVisible;
     private boolean lastOperationSuccessful;
     private boolean isRunning;
-
-    /**
-     * Creates an empty, visible slot machine.
-     */
     public SlotMachine()
     {
         wheels = new ArrayList<>();
@@ -33,12 +20,6 @@ public class SlotMachine
         lastOperationSuccessful = true;
         isRunning = true;
     }
-
-    /**
-     * Inserts an empty wheel at the requested one-based position.
-     *
-     * @param pos position from 1 to the current number of wheels plus one
-     */
     public void addWheel(int pos)
     {
         if (!ensureRunning()) {
@@ -48,7 +29,6 @@ public class SlotMachine
             reportInvalidOperation("The wheel position is invalid.");
             return;
         }
-
         Wheel newWheel = new Wheel(FIRST_WHEEL_X, WHEEL_Y);
         wheels.add(pos - 1, newWheel);
         arrangeWheels();
@@ -58,12 +38,6 @@ public class SlotMachine
         updateJackpotAppearance();
         reportSuccessfulOperation();
     }
-
-    /**
-     * Removes the wheel at the requested one-based position.
-     *
-     * @param pos position of the wheel to remove
-     */
     public void delWheel(int pos)
     {
         if (!ensureRunning()) {
@@ -80,14 +54,6 @@ public class SlotMachine
         updateJackpotAppearance();
         reportSuccessfulOperation();
     }
-
-    /**
-     * Swaps two wheels, including their current symbols and lock states.
-     * Public wheel positions are one-based.
-     *
-     * @param wheel1 position of the first wheel
-     * @param wheel2 position of the second wheel
-     */
     public void swap(int wheel1, int wheel2)
     {
         if (!ensureRunning()) {
@@ -105,12 +71,6 @@ public class SlotMachine
         updateJackpotAppearance();
         reportSuccessfulOperation();
     }
-
-    /**
-     * Locks a wheel so spin operations cannot rotate it.
-     *
-     * @param wheel one-based wheel position
-     */
     public void lock(int wheel)
     {
         if (!ensureRunning()) {
@@ -130,12 +90,6 @@ public class SlotMachine
         selectedWheel.lock();
         reportSuccessfulOperation();
     }
-
-    /**
-     * Unlocks a wheel so spin operations can rotate it again.
-     *
-     * @param wheel one-based wheel position
-     */
     public void unlock(int wheel)
     {
         if (!ensureRunning()) {
@@ -155,14 +109,6 @@ public class SlotMachine
         selectedWheel.unlock();
         reportSuccessfulOperation();
     }
-
-    /**
-     * Inserts a new color symbol at the requested one-based position.
-     * Existing wheels keep showing the same colors after the insertion.
-     *
-     * @param pos position from 1 to the current number of symbols plus one
-     * @param color supported color name
-     */
     public void addSymbol(int pos, String color)
     {
         String normalizedColor = normalizeColor(color);
@@ -189,12 +135,6 @@ public class SlotMachine
         }
         reportSuccessfulOperation();
     }
-
-    /**
-     * Deletes a symbol. A wheel showing that symbol becomes empty.
-     *
-     * @param symbol color symbol to remove
-     */
     public void delSymbol(String symbol)
     {
         String normalizedSymbol = normalizeColor(symbol);
@@ -214,13 +154,6 @@ public class SlotMachine
         updateJackpotAppearance();
         reportSuccessfulOperation();
     }
-
-    /**
-     * Places an existing symbol on a wheel.
-     *
-     * @param wheel one-based wheel position
-     * @param symbol existing color symbol
-     */
     public void placeSymbol(int wheel, String symbol)
     {
         String normalizedSymbol = normalizeColor(symbol);
@@ -241,25 +174,10 @@ public class SlotMachine
         updateJackpotAppearance();
         reportSuccessfulOperation();
     }
-
-    /**
-     * Rotates one wheel one step.
-     *
-     * @param wheel one-based wheel position
-     */
     public void spin(int wheel)
     {
         spin(wheel, 1);
     }
-
-    /**
-     * Rotates one wheel the requested number of steps. Positive values move
-     * forward and negative values move backwards through the shared symbol
-     * catalog. When the machine is visible, every individual step is shown.
-     *
-     * @param wheel one-based wheel position
-     * @param steps signed number of positions to rotate
-     */
     public void spin(int wheel, int steps)
     {
         if (!ensureRunning()) {
@@ -269,7 +187,6 @@ public class SlotMachine
             reportInvalidOperation("The wheel position is invalid.");
             return;
         }
-
         Wheel selectedWheel = wheels.get(wheel - 1);
         if (selectedWheel.isLocked()) {
             reportInvalidOperation("The wheel is locked.");
@@ -279,15 +196,10 @@ public class SlotMachine
             reportInvalidOperation("The wheel does not have a symbol to rotate.");
             return;
         }
-
         rotateWheelBySteps(selectedWheel, steps);
         updateJackpotAppearance();
         reportSuccessfulOperation();
     }
-
-    /**
-     * Rotates every wheel one step.
-     */
     public void spin()
     {
         if (!ensureRunning()) {
@@ -314,14 +226,6 @@ public class SlotMachine
         updateJackpotAppearance();
         reportSuccessfulOperation();
     }
-
-    /**
-     * Rotates the wheels until the requested configuration is reached.
-     * Every target symbol is validated before any wheel is modified. A locked
-     * wheel must already show its requested symbol.
-     *
-     * @param setSymbols requested symbol for every wheel, in wheel order
-     */
     public void spin(String[] setSymbols)
     {
         if (!ensureRunning()) {
@@ -343,7 +247,6 @@ public class SlotMachine
             reportInvalidOperation("The machine does not have symbols.");
             return;
         }
-
         int[] targetIndexes = new int[setSymbols.length];
         for (int i = 0; i < setSymbols.length; i++) {
             String normalizedSymbol = normalizeColor(setSymbols[i]);
@@ -372,7 +275,6 @@ public class SlotMachine
 
             targetIndexes[i] = targetIndex;
         }
-
         for (int i = 0; i < wheels.size(); i++) {
             Wheel wheel = wheels.get(i);
             if (!wheel.isLocked()) {
@@ -387,23 +289,10 @@ public class SlotMachine
         updateJackpotAppearance();
         reportSuccessfulOperation();
     }
-
-    /**
-     * Returns a copy of the ordered symbol catalog.
-     *
-     * @return available color symbols
-     */
     public String[] symbols()
     {
         return symbols.toArray(new String[0]);
     }
-
-    /**
-     * Returns the visible symbol of each wheel. An empty wheel is represented
-     * by a null value.
-     *
-     * @return current machine configuration
-     */
     public String[] configuration()
     {
         String[] result = new String[wheels.size()];
@@ -415,13 +304,6 @@ public class SlotMachine
         }
         return result;
     }
-
-    /**
-     * Counts the different assigned symbols in the current configuration.
-     * Empty wheels are ignored.
-     *
-     * @return number of distinct assigned symbols
-     */
     public int distinctSymbols()
     {
         ArrayList<String> distinct = new ArrayList<>();
@@ -432,26 +314,15 @@ public class SlotMachine
         }
         return distinct.size();
     }
-
-    /**
-     * Reports whether every wheel has the same assigned symbol.
-     *
-     * @return true only for a non-empty, fully assigned winning machine
-     */
     public boolean isJackpot()
     {
         return hasJackpot();
     }
-
-    /**
-     * Makes every wheel visible.
-     */
     public void makeVisible()
     {
         if (!ensureRunning()) {
             return;
         }
-
         isVisible = true;
         for (Wheel wheel : wheels) {
             wheel.makeVisible();
@@ -459,10 +330,6 @@ public class SlotMachine
         updateJackpotAppearance();
         reportSuccessfulOperation();
     }
-
-    /**
-     * Makes every wheel invisible while preserving the machine state.
-     */
     public void makeInvisible()
     {
         if (!ensureRunning()) {
@@ -476,17 +343,12 @@ public class SlotMachine
         Canvas.closeCanvas();
         reportSuccessfulOperation();
     }
-
-    /**
-     * Finishes the simulator and closes its visual canvas.
-     */
     public void exit()
     {
         if (!isRunning) {
             reportInvalidOperation("The simulator has already finished.");
             return;
         }
-
         for (Wheel wheel : wheels) {
             wheel.makeInvisible();
         }
@@ -495,12 +357,6 @@ public class SlotMachine
         Canvas.closeCanvas();
         reportSuccessfulOperation();
     }
-
-    /**
-     * Reports whether the last command was successful.
-     *
-     * @return true when the last command was valid
-     */
     public boolean ok()
     {
         return lastOperationSuccessful;
@@ -568,7 +424,6 @@ public class SlotMachine
             remainingSteps--;
         }
     }
-
     private boolean allWheelsHaveSymbols()
     {
         for (Wheel wheel : wheels) {
@@ -578,7 +433,6 @@ public class SlotMachine
         }
         return true;
     }
-
     private boolean hasUnlockedWheel()
     {
         for (Wheel wheel : wheels) {
@@ -598,7 +452,6 @@ public class SlotMachine
         }
         return true;
     }
-
     private boolean hasJackpot()
     {
         if (wheels.isEmpty() || !allWheelsHaveSymbols()) {
@@ -613,7 +466,6 @@ public class SlotMachine
         }
         return true;
     }
-
     private void updateJackpotAppearance()
     {
         boolean jackpot = hasJackpot();
@@ -621,12 +473,10 @@ public class SlotMachine
             wheel.setJackpotAppearance(jackpot);
         }
     }
-
     private void reportSuccessfulOperation()
     {
         lastOperationSuccessful = true;
     }
-
     private void reportInvalidOperation(String message)
     {
         lastOperationSuccessful = false;
