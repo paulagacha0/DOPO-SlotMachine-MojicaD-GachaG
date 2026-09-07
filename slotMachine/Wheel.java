@@ -6,7 +6,7 @@
  * its current color symbol. Both circles are reused from the shapes project.
  *
  * @author Paula Gacha and Diego Mojica
- * @version Cycle 1 corrected
+ * @version Cycle 2 complete implementation
  */
 public class Wheel
 {
@@ -25,6 +25,7 @@ public class Wheel
     private int yPosition;
     private boolean isVisible;
     private boolean hasJackpotAppearance;
+    private boolean isLocked;
 
     /**
      * Creates an empty wheel at the requested position.
@@ -41,6 +42,7 @@ public class Wheel
         yPosition = y;
         isVisible = false;
         hasJackpotAppearance = false;
+        isLocked = false;
 
         frameCircle.changeSize(OUTER_DIAMETER);
         frameCircle.changeColor(NORMAL_FRAME_COLOR);
@@ -91,12 +93,38 @@ public class Wheel
      */
     public void rotate(int steps, int symbolCount)
     {
-        if (hasSymbol() && symbolCount > 0) {
-            currentSymbolIndex = Math.floorMod(
-                currentSymbolIndex + steps,
-                symbolCount
+        if (!isLocked && hasSymbol() && symbolCount > 0) {
+            currentSymbolIndex = (int) Math.floorMod(
+                (long) currentSymbolIndex + steps,
+                (long) symbolCount
             );
         }
+    }
+
+    /**
+     * Locks this wheel so rotation operations leave it unchanged.
+     */
+    public void lock()
+    {
+        isLocked = true;
+    }
+
+    /**
+     * Unlocks this wheel so it can rotate again.
+     */
+    public void unlock()
+    {
+        isLocked = false;
+    }
+
+    /**
+     * Reports whether this wheel is locked.
+     *
+     * @return true when rotation is disabled for this wheel
+     */
+    public boolean isLocked()
+    {
+        return isLocked;
     }
 
     /**

@@ -7,13 +7,14 @@ import javax.swing.JOptionPane;
  * zero-based.
  *
  * @author Paula Gacha and Diego Mojica
- * @version Cycle 1 corrected
+ * @version Cycle 2 complete implementation
  */
 public class SlotMachine
 {
     private static final int FIRST_WHEEL_X = 30;
     private static final int WHEEL_Y = 70;
     private static final int WHEEL_SPACING = 65;
+    private static final int STEP_ANIMATION_DELAY_MS = 200;
 
     private final ArrayList<Wheel> wheels;
     private final ArrayList<String> symbols;
@@ -77,6 +78,81 @@ public class SlotMachine
         removedWheel.makeInvisible();
         arrangeWheels();
         updateJackpotAppearance();
+        reportSuccessfulOperation();
+    }
+
+    /**
+     * Swaps two wheels, including their current symbols and lock states.
+     * Public wheel positions are one-based.
+     *
+     * @param wheel1 position of the first wheel
+     * @param wheel2 position of the second wheel
+     */
+    public void swap(int wheel1, int wheel2)
+    {
+        if (!ensureRunning()) {
+            return;
+        }
+        if (!isWheelPosition(wheel1) || !isWheelPosition(wheel2)) {
+            reportInvalidOperation("A wheel position is invalid.");
+            return;
+        }
+
+        Wheel firstWheel = wheels.get(wheel1 - 1);
+        wheels.set(wheel1 - 1, wheels.get(wheel2 - 1));
+        wheels.set(wheel2 - 1, firstWheel);
+        arrangeWheels();
+        updateJackpotAppearance();
+        reportSuccessfulOperation();
+    }
+
+    /**
+     * Locks a wheel so spin operations cannot rotate it.
+     *
+     * @param wheel one-based wheel position
+     */
+    public void lock(int wheel)
+    {
+        if (!ensureRunning()) {
+            return;
+        }
+        if (!isWheelPosition(wheel)) {
+            reportInvalidOperation("The wheel position is invalid.");
+            return;
+        }
+
+        Wheel selectedWheel = wheels.get(wheel - 1);
+        if (selectedWheel.isLocked()) {
+            reportInvalidOperation("The wheel is already locked.");
+            return;
+        }
+
+        selectedWheel.lock();
+        reportSuccessfulOperation();
+    }
+
+    /**
+     * Unlocks a wheel so spin operations can rotate it again.
+     *
+     * @param wheel one-based wheel position
+     */
+    public void unlock(int wheel)
+    {
+        if (!ensureRunning()) {
+            return;
+        }
+        if (!isWheelPosition(wheel)) {
+            reportInvalidOperation("The wheel position is invalid.");
+            return;
+        }
+
+        Wheel selectedWheel = wheels.get(wheel - 1);
+        if (!selectedWheel.isLocked()) {
+            reportInvalidOperation("The wheel is already unlocked.");
+            return;
+        }
+
+        selectedWheel.unlock();
         reportSuccessfulOperation();
     }
 
@@ -173,6 +249,19 @@ public class SlotMachine
      */
     public void spin(int wheel)
     {
+        spin(wheel, 1);
+    }
+
+    /**
+     * Rotates one wheel the requested number of steps. Positive values move
+     * forward and negative values move backwards through the shared symbol
+     * catalog. When the machine is visible, every individual step is shown.
+     *
+     * @param wheel one-based wheel position
+     * @param steps signed number of positions to rotate
+     */
+    public void spin(int wheel, int steps)
+    {
         if (!ensureRunning()) {
             return;
         }
@@ -182,12 +271,16 @@ public class SlotMachine
         }
 
         Wheel selectedWheel = wheels.get(wheel - 1);
+        if (selectedWheel.isLocked()) {
+            reportInvalidOperation("The wheel is locked.");
+            return;
+        }
         if (symbols.isEmpty() || !selectedWheel.hasSymbol()) {
             reportInvalidOperation("The wheel does not have a symbol to rotate.");
             return;
         }
 
-        rotateWheel(selectedWheel, 1);
+        rotateWheelBySteps(selectedWheel, steps);
         updateJackpotAppearance();
         reportSuccessfulOperation();
     }
@@ -204,14 +297,93 @@ public class SlotMachine
             reportInvalidOperation("The machine does not have wheels and symbols to rotate.");
             return;
         }
-        if (!allWheelsHaveSymbols()) {
-            reportInvalidOperation("Every wheel must have a symbol before rotating the machine.");
+        if (!hasUnlockedWheel()) {
+            reportInvalidOperation("The machine does not have an unlocked wheel to rotate.");
+            return;
+        }
+        if (!allUnlockedWheelsHaveSymbols()) {
+            reportInvalidOperation("Every unlocked wheel must have a symbol before rotating the machine.");
             return;
         }
 
         for (Wheel wheel : wheels) {
-            rotateWheel(wheel, 1);
+            if (!wheel.isLocked()) {
+                rotateWheel(wheel, 1);
+            }
         }
+        updateJackpotAppearance();
+        reportSuccessfulOperation();
+    }
+
+    /**
+     * Rotates the wheels until the requested configuration is reached.
+     * Every target symbol is validated before any wheel is modified. A locked
+     * wheel must already show its requested symbol.
+     *
+     * @param setSymbols requested symbol for every wheel, in wheel order
+     */
+    public void spin(String[] setSymbols)
+    {
+        if (!ensureRunning()) {
+            return;
+        }
+        if (setSymbols == null) {
+            reportInvalidOperation("The requested configuration is null.");
+            return;
+        }
+        if (wheels.isEmpty()) {
+            reportInvalidOperation("The machine does not have wheels.");
+            return;
+        }
+        if (setSymbols.length != wheels.size()) {
+            reportInvalidOperation("The requested configuration has an invalid size.");
+            return;
+        }
+        if (symbols.isEmpty()) {
+            reportInvalidOperation("The machine does not have symbols.");
+            return;
+        }
+
+        int[] targetIndexes = new int[setSymbols.length];
+        for (int i = 0; i < setSymbols.length; i++) {
+            String normalizedSymbol = normalizeColor(setSymbols[i]);
+            int targetIndex = symbols.indexOf(normalizedSymbol);
+            Wheel wheel = wheels.get(i);
+
+            if (targetIndex < 0) {
+                reportInvalidOperation(
+                    "A symbol in the requested configuration does not exist."
+                );
+                return;
+            }
+            if (!wheel.hasSymbol()) {
+                reportInvalidOperation(
+                    "Every wheel must have a symbol before setting a configuration."
+                );
+                return;
+            }
+            if (wheel.isLocked()
+                && wheel.getCurrentSymbolIndex() != targetIndex) {
+                reportInvalidOperation(
+                    "A locked wheel cannot reach the requested configuration."
+                );
+                return;
+            }
+
+            targetIndexes[i] = targetIndex;
+        }
+
+        for (int i = 0; i < wheels.size(); i++) {
+            Wheel wheel = wheels.get(i);
+            if (!wheel.isLocked()) {
+                int steps = Math.floorMod(
+                    targetIndexes[i] - wheel.getCurrentSymbolIndex(),
+                    symbols.size()
+                );
+                rotateWheelBySteps(wheel, steps);
+            }
+        }
+
         updateJackpotAppearance();
         reportSuccessfulOperation();
     }
@@ -380,10 +552,47 @@ public class SlotMachine
         wheel.showSymbol(color);
     }
 
+    private void rotateWheelBySteps(Wheel wheel, int steps)
+    {
+        if (!isVisible || steps == 0) {
+            rotateWheel(wheel, steps);
+            return;
+        }
+
+        int direction = steps > 0 ? 1 : -1;
+        long remainingSteps = Math.abs((long) steps);
+        while (remainingSteps > 0) {
+            rotateWheel(wheel, direction);
+            updateJackpotAppearance();
+            Canvas.getCanvas().wait(STEP_ANIMATION_DELAY_MS);
+            remainingSteps--;
+        }
+    }
+
     private boolean allWheelsHaveSymbols()
     {
         for (Wheel wheel : wheels) {
             if (!wheel.hasSymbol()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean hasUnlockedWheel()
+    {
+        for (Wheel wheel : wheels) {
+            if (!wheel.isLocked()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean allUnlockedWheelsHaveSymbols()
+    {
+        for (Wheel wheel : wheels) {
+            if (!wheel.isLocked() && !wheel.hasSymbol()) {
                 return false;
             }
         }
