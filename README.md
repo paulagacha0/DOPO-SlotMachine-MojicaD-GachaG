@@ -34,8 +34,6 @@ The Cycle 2 implementation is complete:
 - `SlotMachineC2Test` covers positive and negative scenarios.
 - `SlotMachineCC2Test` contains two tests identified by the team initials.
 
-The final Astah file is intentionally pending because Diego is responsible for
-creating and synchronizing all class and sequence diagrams with this code.
 
 ## Open in BlueJ
 
