@@ -1,44 +1,21 @@
-Project "shapes"
-Authors: Michael Kolling and David J. Barnes
+SlotMachine — Paula Gacha y Diego Mojica
 
-This project is part of the material for the book
+Abra package.bluej con BlueJ y compile. Hay trece clases principales y cinco
+clases de prueba JUnit 4, con 61 casos. Ejecute Test All en cada una.
 
-   Objects First with Java - A Practical Introduction using BlueJ
-   David J. Barnes and Michael Kolling
-   Pearson Education, 2002
+SlotMachine() crea una máquina manual vacía. SlotMachine(n) crea n ruedas y
+n símbolos con asignación aleatoria; admite 3 a 50 y empieza invisible.
+SlotMachineContest.solve(n) devuelve todos los giros; simulate(n) los muestra
+sobre una nueva máquina. Para la sustentación empiece con n=4.
 
-It is discussed in chapter 1.
+La documentación completa está en ../docs/ciclo3. El código está en inglés y
+los comentarios de estudio en español con etiquetas de clase y conexiones.
 
-This is a very simple project to demonstrate some characteristics of
-objects.
+Origen del material gráfico
+Proyecto shapes, de Michael Kölling y David J. Barnes.
+Material del libro Objects First with Java - A Practical Introduction using
+BlueJ. David J. Barnes y Michael Kölling. Pearson Education, 2002, capítulo 1.
 
-You can create various shapes, and you will see, if you do, that those
-shapes are drawn on screen (in a window that we call the "canvas").
-
-You can then manipulate these objects: change their position, size and 
-colour. Try it out: create a few different squares, triangles and circles.
-
-This project is designed as a first example of object-oriented programming.
-It illustrates a number of concepts:
-
- - a Java project (application) is a collection of classes
- - objects can be created from classes
- - from any one class, many objects may be created
- - objects have operations (methods)
- - operations can have parameters
- - parameters have types (at least String and int)
- - objects hold data (fields)
- - the operations and fields are common to all objects
- - the values stored in the fields can be different for each object
-
-The project also demonstrates
-
- - BlueJ object creation
- - interactive method invocation
- - parameter passing
-
-A good second project to look at after this is "picture", which adds a class
-to those ones in this project. That class (named "Picture") uses the shapes
-to draw a picture. It can be used to experiment with coding.
-
-Michael Kolling, July 2000
+El material original ilustra clases, objetos, atributos, métodos, parámetros,
+tipos y varias instancias de una misma clase. Se reutilizan y amplían las
+figuras y el lienzo; la lógica de SlotMachine y del concurso está separada.

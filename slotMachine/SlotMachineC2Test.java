@@ -5,18 +5,18 @@ import org.junit.Before;
 import org.junit.Test;
 
 /**
- * Unit tests for all Cycle 2 functional requirements.
- * Every test runs with the simulator in invisible mode.
- *
- * @author Paula Gacha
- * @version Cycle 2 complete tests
+ * [P] Agrupa veinte pruebas de intercambio bloqueo y giros contiene cuatro ayudantes privados
+ * de preparación
  */
 public class SlotMachineC2Test
 {
+    /**
+     * [P] Referencia al simulador bajo prueba, setUp crea uno nuevo antes de cada caso
+     */
     private SlotMachine machine;
 
     /**
-     * Creates an invisible machine before every test.
+     * [P] Prepara una máquina nueva e invisible antes de cada caso de prueba
      */
     @Before
     public void setUp()
@@ -25,6 +25,10 @@ public class SlotMachineC2Test
         machine.makeInvisible();
     }
 
+    /**
+     * [P] Comprueba el intercambio de dos ruedas
+     * ->JUnit
+     */
     @Test
     public void shouldSwapTwoWheels()
     {
@@ -39,6 +43,10 @@ public class SlotMachineC2Test
         assertTrue(machine.ok());
     }
 
+    /**
+     * [P] Comprueba que no haya intercambio parcial con una posición inválida
+     * ->JUnit
+     */
     @Test
     public void shouldNotSwapWhenAWheelPositionIsInvalid()
     {
@@ -53,6 +61,10 @@ public class SlotMachineC2Test
         assertFalse(machine.ok());
     }
 
+    /**
+     * [P] Comprueba que un giro directo respete el bloqueo
+     * Conecta con JUnit
+     */
     @Test
     public void shouldKeepALockedWheelStillDuringDirectSpin()
     {
@@ -68,6 +80,10 @@ public class SlotMachineC2Test
         assertFalse(machine.ok());
     }
 
+    /**
+     * [P] Comprueba que desbloquear permita un giro posterior
+     * ->JUnit
+     */
     @Test
     public void shouldUnlockAWheelAndAllowItToSpinAgain()
     {
@@ -84,6 +100,10 @@ public class SlotMachineC2Test
         assertTrue(machine.ok());
     }
 
+    /**
+     * [P] Comprueba que el giro general omita las bloqueadas
+     * ->JUnit
+     */
     @Test
     public void shouldSpinOnlyUnlockedWheels()
     {
@@ -104,6 +124,10 @@ public class SlotMachineC2Test
         assertTrue(machine.ok());
     }
 
+    /**
+     * [P] Comprueba que el bloqueo viaje con el objeto intercambiado
+     * ->JUnit
+     */
     @Test
     public void shouldKeepTheLockStateWithTheSwappedWheel()
     {
@@ -120,6 +144,10 @@ public class SlotMachineC2Test
         assertFalse(machine.ok());
     }
 
+    /**
+     * [P] Comprueba el rechazo de bloquear o desbloquear dos veces
+     * ->JUnit
+     */
     @Test
     public void shouldRejectRepeatedLockAndUnlockCommands()
     {
@@ -136,6 +164,10 @@ public class SlotMachineC2Test
         assertFalse(machine.ok());
     }
 
+    /**
+     * [P] Comprueba posiciones que no corresponden a ruedas
+     * ->JUnit
+     */
     @Test
     public void shouldRejectInvalidLockAndUnlockPositions()
     {
@@ -148,6 +180,10 @@ public class SlotMachineC2Test
         assertFalse(machine.ok());
     }
 
+    /**
+     * [P] Comprueba un giro que da más de una vuelta al catálogo
+     * ->JUnit
+     */
     @Test
     public void shouldRotateAWheelSeveralPositiveSteps()
     {
@@ -162,6 +198,10 @@ public class SlotMachineC2Test
         assertTrue(machine.ok());
     }
 
+    /**
+     * [P] Comprueba un paso negativo desde el inicio del catálogo
+     * ->JUnit
+     */
     @Test
     public void shouldRotateAWheelBackwards()
     {
@@ -176,6 +216,10 @@ public class SlotMachineC2Test
         assertTrue(machine.ok());
     }
 
+    /**
+     * [P] Comprueba el giro válido de cero pasos
+     * ->JUnit
+     */
     @Test
     public void shouldAcceptZeroStepsWithoutChangingTheWheel()
     {
@@ -190,6 +234,10 @@ public class SlotMachineC2Test
         assertTrue(machine.ok());
     }
 
+    /**
+     * [P] Comprueba el cálculo con un entero muy grande
+     * ->JUnit
+     */
     @Test
     public void shouldRotateSafelyWithAVeryLargeStepCount()
     {
@@ -204,6 +252,10 @@ public class SlotMachineC2Test
         assertTrue(machine.ok());
     }
 
+    /**
+     * [P] Comprueba que varios pasos tampoco ignoren el bloqueo
+     * ->JUnit
+     */
     @Test
     public void shouldNotRotateSeveralStepsWhenWheelIsLocked()
     {
@@ -219,6 +271,10 @@ public class SlotMachineC2Test
         assertFalse(machine.ok());
     }
 
+    /**
+     * [P] Comprueba un destino completo válido
+     * ->JUnit
+     */
     @Test
     public void shouldReachARequestedConfiguration()
     {
@@ -233,6 +289,10 @@ public class SlotMachineC2Test
         assertTrue(machine.ok());
     }
 
+    /**
+     * [P] Comprueba la normalización de cada destino
+     * ->JUnit
+     */
     @Test
     public void shouldNormalizeRequestedConfigurationSymbols()
     {
@@ -247,6 +307,10 @@ public class SlotMachineC2Test
         assertTrue(machine.ok());
     }
 
+    /**
+     * [P] Comprueba un destino compatible con una rueda bloqueada
+     * ->JUnit
+     */
     @Test
     public void shouldReachConfigurationWhenLockedWheelAlreadyMatches()
     {
@@ -262,6 +326,10 @@ public class SlotMachineC2Test
         assertTrue(machine.ok());
     }
 
+    /**
+     * [P] Comprueba el rechazo de un destino incompatible con el bloqueo
+     * ->JUnit
+     */
     @Test
     public void shouldRejectConfigurationThatChangesALockedWheel()
     {
@@ -277,6 +345,10 @@ public class SlotMachineC2Test
         assertFalse(machine.ok());
     }
 
+    /**
+     * [P] Comprueba que un color desconocido no deje cambios parciales
+     * ->JUnit
+     */
     @Test
     public void shouldRejectUnknownConfigurationAtomically()
     {
@@ -291,6 +363,10 @@ public class SlotMachineC2Test
         assertFalse(machine.ok());
     }
 
+    /**
+     * [P] Comprueba un destino nulo y otro de tamaño incorrecto
+     * ->JUnit
+     */
     @Test
     public void shouldRejectNullAndWrongSizedConfigurations()
     {
@@ -311,6 +387,10 @@ public class SlotMachineC2Test
         );
     }
 
+    /**
+     * [P] Comprueba que la configuración objetivo no se use para iniciar una rueda vacía
+     * ->JUnit
+     */
     @Test
     public void shouldRejectRequestedConfigurationWhenAWheelIsEmpty()
     {
@@ -323,6 +403,10 @@ public class SlotMachineC2Test
         assertFalse(machine.ok());
     }
 
+    /**
+     * [P] Prepara el catálogo [red, blue] y la configuración [red] para las pruebas que lo
+     * necesitan
+     */
     private void prepareOneConfiguredWheel()
     {
         machine.addSymbol(1, "red");
@@ -331,6 +415,10 @@ public class SlotMachineC2Test
         machine.placeSymbol(1, "red");
     }
 
+    /**
+     * [P] Prepara el catálogo [red, blue] y la configuración [red, blue] para las pruebas que lo
+     * necesitan
+     */
     private void prepareTwoConfiguredWheels()
     {
         machine.addSymbol(1, "red");
@@ -341,6 +429,10 @@ public class SlotMachineC2Test
         machine.placeSymbol(2, "blue");
     }
 
+    /**
+     * [P] Prepara el catálogo [red, blue, green] y la configuración [red] para las pruebas que
+     * lo necesitan
+     */
     private void prepareThreeSymbolsAndOneWheel()
     {
         machine.addSymbol(1, "red");
@@ -350,6 +442,10 @@ public class SlotMachineC2Test
         machine.placeSymbol(1, "red");
     }
 
+    /**
+     * [P] Prepara el catálogo [red, blue, green] y la configuración [red, blue, green] para las
+     * pruebas que lo necesitan
+     */
     private void prepareThreeConfiguredWheels()
     {
         machine.addSymbol(1, "red");

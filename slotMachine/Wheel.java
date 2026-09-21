@@ -1,23 +1,22 @@
 /**
- * Represents one wheel of the slot machine. A new wheel is empty until the
- * machine explicitly places a symbol on it.
- *
- * The outer circle represents the wheel frame and the inner circle represents
- * its current color symbol. Both circles are reused from the shapes project.
- *
- * @author Paula Gacha and Diego Mojica
- * @version Cycle 2 complete implementation
+ * [W] Conserva el índice y el bloqueo de una rueda, controla dos Circle que dibujan el marco y
+ * el interior
  */
 public class Wheel
 {
+    /**
+     * [W] Indicador -1 que significa que aún no hay un símbolo asignado
+     */
     private static final int NO_SYMBOL = -1;
+    /**
+     * [W] Configuraciones y cosasgenerales
+     */
     private static final int OUTER_DIAMETER = 52;
     private static final int INNER_DIAMETER = 42;
     private static final int INNER_OFFSET = 5;
     private static final String EMPTY_COLOR = "white";
     private static final String NORMAL_FRAME_COLOR = "black";
     private static final String JACKPOT_FRAME_COLOR = "yellow";
-
     private int currentSymbolIndex;
     private final Circle frameCircle;
     private final Circle symbolCircle;
@@ -28,10 +27,8 @@ public class Wheel
     private boolean isLocked;
 
     /**
-     * Creates an empty wheel at the requested position.
-     *
-     * @param x horizontal position of the wheel frame
-     * @param y vertical position of the wheel frame
+     * [W] Construye una rueda vacía con un círculo para el marco y otro para el interior
+     * ->CI
      */
     public Wheel(int x, int y)
     {
@@ -55,10 +52,8 @@ public class Wheel
     }
 
     /**
-     * Assigns a symbol and its visual color to this wheel.
-     *
-     * @param symbolIndex index in the shared symbol catalog
-     * @param color color used to represent the symbol
+     * [W] Asigna el índice de un símbolo y actualiza su color
+     * ->W
      */
     public void setSymbol(int symbolIndex, String color)
     {
@@ -67,9 +62,8 @@ public class Wheel
     }
 
     /**
-     * Changes only the visual color of the assigned symbol.
-     *
-     * @param color color to display
+     * [W] Cambia únicamente el color del círculo interior
+     * ->CI
      */
     public void showSymbol(String color)
     {
@@ -77,7 +71,8 @@ public class Wheel
     }
 
     /**
-     * Removes the current symbol and restores the empty-wheel appearance.
+     * [W] Deja la rueda sin símbolo asignado
+     * ->CI
      */
     public void clearSymbol()
     {
@@ -86,10 +81,7 @@ public class Wheel
     }
 
     /**
-     * Rotates the stored symbol index using circular arithmetic.
-     *
-     * @param steps number of positions to move
-     * @param symbolCount number of symbols in the shared catalog
+     * [W] Calcula el nuevo índice circular de una rueda que puede girar
      */
     public void rotate(int steps, int symbolCount)
     {
@@ -102,7 +94,7 @@ public class Wheel
     }
 
     /**
-     * Locks this wheel so rotation operations leave it unchanged.
+     * [W] Marca la rueda como bloqueada
      */
     public void lock()
     {
@@ -110,7 +102,7 @@ public class Wheel
     }
 
     /**
-     * Unlocks this wheel so it can rotate again.
+     * [W] Marca la rueda como desbloqueada
      */
     public void unlock()
     {
@@ -118,9 +110,7 @@ public class Wheel
     }
 
     /**
-     * Reports whether this wheel is locked.
-     *
-     * @return true when rotation is disabled for this wheel
+     * [W] Devuelve si esta rueda está bloqueada
      */
     public boolean isLocked()
     {
@@ -128,9 +118,7 @@ public class Wheel
     }
 
     /**
-     * Reports whether this wheel currently has an assigned symbol.
-     *
-     * @return true when a symbol has been placed
+     * [W] Devuelve si la rueda tiene un índice distinto del indicador de vacío
      */
     public boolean hasSymbol()
     {
@@ -138,9 +126,7 @@ public class Wheel
     }
 
     /**
-     * Returns the current index in the shared symbol catalog.
-     *
-     * @return symbol index or -1 when the wheel is empty
+     * [W] Devuelve el índice actual del símbolo
      */
     public int getCurrentSymbolIndex()
     {
@@ -148,9 +134,8 @@ public class Wheel
     }
 
     /**
-     * Preserves the current symbol after a catalog insertion.
-     *
-     * @param insertedIndex zero-based inserted symbol index
+     * [W] Corrige el índice cuando se inserta un símbolo delante del actual
+     * ->W
      */
     public void adjustAfterSymbolInsertion(int insertedIndex)
     {
@@ -160,10 +145,8 @@ public class Wheel
     }
 
     /**
-     * Preserves the current symbol after a catalog deletion, or empties the
-     * wheel when its displayed symbol was deleted.
-     *
-     * @param removedIndex zero-based removed symbol index
+     * [W] Corrige o vacía la rueda después de eliminar un símbolo del catálogo
+     * ->W
      */
     public void adjustAfterSymbolRemoval(int removedIndex)
     {
@@ -175,10 +158,8 @@ public class Wheel
     }
 
     /**
-     * Moves both visual circles to a new absolute position.
-     *
-     * @param x new horizontal position
-     * @param y new vertical position
+     * [W] Mueve los dos círculos a una nueva posición de pantalla
+     * ->CI.
      */
     public void moveTo(int x, int y)
     {
@@ -195,7 +176,8 @@ public class Wheel
     }
 
     /**
-     * Makes the empty frame and current symbol visible.
+     * [W] Muestra el marco y después el interior de larueda
+     * ->CI
      */
     public void makeVisible()
     {
@@ -205,7 +187,8 @@ public class Wheel
     }
 
     /**
-     * Hides both visual circles.
+     * [W] Oculta los dos círculos de esta rueda
+     * ->CI
      */
     public void makeInvisible()
     {
@@ -215,10 +198,8 @@ public class Wheel
     }
 
     /**
-     * Changes the wheel frame so the complete machine looks different when it
-     * reaches a jackpot.
-     *
-     * @param jackpot true to show the winning appearance
+     * [W] Cambia el marco a amarillo si hay jackpot y a negro si no lo hay
+     * ->CI.
      */
     public void setJackpotAppearance(boolean jackpot)
     {
