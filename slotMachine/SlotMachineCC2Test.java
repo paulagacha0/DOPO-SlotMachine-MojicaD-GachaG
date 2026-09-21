@@ -5,17 +5,19 @@ import org.junit.Before;
 import org.junit.Test;
 
 /**
- * Collective Cycle 2 tests prepared for the corresponding class wiki.
- * The method names identify the authors using their surname initials. The
- * team must publish or verify these cases in the wiki before the delivery.
- *
- * @author Paula Gacha and Diego Mojica
- * @version Cycle 2 complete collective tests
+ * [P] Contiene dos casos de prueba identificados por el equipo sobre bloqueo y rechazo de
+ * destinos inválidos
  */
 public class SlotMachineCC2Test
 {
+    /**
+     * [P] Referencia al simulador bajo prueba, setUp crea uno nuevo antes de cada caso
+     */
     private SlotMachine machine;
 
+    /**
+     * [P] Prepara una máquina nueva e invisible antes de cada caso de prueba
+     */
     @Before
     public void setUp()
     {
@@ -23,6 +25,11 @@ public class SlotMachineCC2Test
         machine.makeInvisible();
     }
 
+    /**
+     * [P] Comprueba el giro general con una rueda bloqueada en un caso identificado por el
+     * equipo
+     * ->JUnit
+     */
     @Test
     public void accordingGgMdShouldKeepLockedWheelStillWhileSpinningAll()
     {
@@ -43,6 +50,10 @@ public class SlotMachineCC2Test
         assertTrue(machine.ok());
     }
 
+    /**
+     * [P] Comprueba que se rechace todo el destino cuando uno de sus colores es desconocido
+     * ->JUnit
+     */
     @Test
     public void accordingGgMdShouldRejectInvalidTargetWithoutPartialChanges()
     {

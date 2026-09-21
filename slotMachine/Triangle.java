@@ -1,16 +1,19 @@
 import java.awt.*;
 
 /**
- * A triangle that can be manipulated and that draws itself on a canvas.
- * 
- * @author  Michael Kolling and David J. Barnes
- * @version 1.0  (15 July 2000)
+ * [TR] Representa un triángulo gráfico reutilizado de shapes, no participa en la lógica actual
+ * de SlotMachine
  */
-
 public class Triangle{
-    
+
+    /**
+     * [TR] Valor compartido 3
+     */
     public static int VERTICES=3;
-    
+
+    /**
+     * [TR] Configruraciones iniciales y demas
+     */
     private int height;
     private int width;
     private int xPosition;
@@ -19,7 +22,7 @@ public class Triangle{
     private boolean isVisible;
 
     /**
-     * Create a new triangle at default position with default color.
+     * [TR] Construye un triángulo con sus valores iniciales y lo deja invisible
      */
     public Triangle(){
         height = 30;
@@ -31,52 +34,51 @@ public class Triangle{
     }
 
     /**
-     * Make this triangle visible. If it was already visible, do nothing.
+     * [TR] Muestra este triángulo con el estado que tiene guardado
      */
     public void makeVisible(){
         isVisible = true;
         draw();
     }
-    
+
     /**
-     * Make this triangle invisible. If it was already invisible, do nothing.
+     * [TR] Oculta este triángulo sin borrar sus atributos
      */
     public void makeInvisible(){
         erase();
         isVisible = false;
     }
-    
+
     /**
-     * Move the triangle a few pixels to the right.
+     * [TR] Desplaza este triángulo 20 píxeles hacia derecha
      */
     public void moveRight(){
         moveHorizontal(20);
     }
 
     /**
-     * Move the triangle a few pixels to the left.
+     * [TR] Desplaza este triángulo 20 píxeles hacia izquierda
      */
     public void moveLeft(){
         moveHorizontal(-20);
     }
 
     /**
-     * Move the triangle a few pixels up.
+     * [TR] Desplaza este triángulo 20 píxeles hacia arriba
      */
     public void moveUp(){
         moveVertical(-20);
     }
 
     /**
-     * Move the triangle a few pixels down.
+     * [TR] Desplaza este triángulo 20 píxeles hacia abajo
      */
     public void moveDown(){
         moveVertical(20);
     }
 
     /**
-     * Move the triangle horizontally.
-     * @param distance the desired distance in pixels
+     * [TR] Cambia xPosition una distancia, actualiza el dibujo
      */
     public void moveHorizontal(int distance){
         erase();
@@ -85,8 +87,7 @@ public class Triangle{
     }
 
     /**
-     * Move the triangle vertically.
-     * @param distance the desired distance in pixels
+     * [TR] Cambia yPosition una distancia y actualiza el dibujo
      */
     public void moveVertical(int distance){
         erase();
@@ -95,8 +96,7 @@ public class Triangle{
     }
 
     /**
-     * Slowly move the triangle horizontally.
-     * @param distance the desired distance in pixels
+     * [TR] Desplaza xPosition píxel a píxel en la dirección pedida
      */
     public void slowMoveHorizontal(int distance){
         int delta;
@@ -115,8 +115,7 @@ public class Triangle{
     }
 
     /**
-     * Slowly move the triangle vertically.
-     * @param distance the desired distance in pixels
+     * [TR] Desplaza yPosition píxel a píxel en la dirección pedida
      */
     public void slowMoveVertical(int distance){
         int delta;
@@ -135,9 +134,7 @@ public class Triangle{
     }
 
     /**
-     * Change the size to the new size
-     * @param newHeight the new height in pixels. newHeight must be >=0.
-     * @param newWidht the new width in pixels. newWidht must be >=0.
+     * [TR] Cambia height y width y actualiza la geometría del triángulo
      */
     public void changeSize(int newHeight, int newWidth) {
         erase();
@@ -145,19 +142,19 @@ public class Triangle{
         width = newWidth;
         draw();
     }
-    
+
     /**
-     * Change the color. 
-     * @param color the new color. Valid colors are "red", "yellow", "blue", "green",
-     * "magenta" and "black".
+     * [TR] Guarda el color solicitado y vuelve a dibujar el triángulo
+     * ->CV
      */
     public void changeColor(String newColor){
         color = newColor;
         draw();
     }
 
-    /*
-     * Draw the triangle with current specifications on screen.
+    /**
+     * [TR] Entrega a Canvas la geometría y el color de este triángulosi está visible
+     * ->CV.
      */
     private void draw(){
         if(isVisible) {
@@ -169,8 +166,9 @@ public class Triangle{
         }
     }
 
-    /*
-     * Erase the triangle on screen.
+    /**
+     * [TR] Pide retirar de Canvas el dibujo de este triángulo
+     * ->CV
      */
     private void erase(){
         if(isVisible) {

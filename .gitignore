@@ -1,19 +1,16 @@
-# Java compilation output
+# Compilación y archivos generados por BlueJ
 *.class
-
-# BlueJ generated context and compatibility files
 *.ctxt
 bluej.pkg
 
-# Operating-system files
+# Temporales y archivos del sistema
+*.tmp
+*.bak
+~$*
 .DS_Store
 Thumbs.db
-
-# IDE folders
 .idea/
 .vscode/
 
-# Temporary files and packaged copies
-*.tmp
-*.bak
-slotMachine.zip
+# Los archivos extraídos se versionan, no las copias empaquetadas
+*.zip

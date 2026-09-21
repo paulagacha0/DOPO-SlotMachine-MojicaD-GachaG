@@ -1,17 +1,47 @@
 import java.util.ArrayList;
+import java.util.Random;
 import javax.swing.JOptionPane;
+/**
+ * [SM] Administra el catálogo compartido, la colección de ruedas, las validaciones y las
+ * operaciones públicas del simulador
+ */
 public class SlotMachine
 {
+    /**
+     * conf generales, posicion y demas
+     */    
     private static final int FIRST_WHEEL_X = 30;
     private static final int WHEEL_Y = 70;
     private static final int WHEEL_SPACING = 65;
+    private static final int WHEELS_PER_ROW = 10;
+    private static final int ROW_SPACING = 80;
     private static final int STEP_ANIMATION_DELAY_MS = 200;
 
+    /**
+     * [SM] Lista de referencias a objetos Wheel final-> impide sustituir la lista, pero
+     * permite editar sus elementos
+     */
     private final ArrayList<Wheel> wheels;
+    /**
+     * [SM] Catálogo compartido de color,cada rueda guarda un índice dentro
+     * de esta lista
+     */
     private final ArrayList<String> symbols;
+    /**
+     * [SM] Indica si las órdenes deben mostrar dibujos, animación y mensajes
+     */
     private boolean isVisible;
+    /**
+     * [SM] Resultado del último comando registrado ok
+     */
     private boolean lastOperationSuccessful;
+    /**
+     * [SM] Indica si simulador sigue aceptando órdenes
+     */
     private boolean isRunning;
+    /**
+     * [SM] Crea una máquina con dos listas vacías y deja preparadas en estado inicial
+     */
     public SlotMachine()
     {
         wheels = new ArrayList<>();
@@ -20,6 +50,37 @@ public class SlotMachine
         lastOperationSuccessful = true;
         isRunning = true;
     }
+
+    /**
+     * [SM] Crea n ruedas y n símbolos signa cada rueda al azar y empieza invisible
+     */
+    public SlotMachine(int n)
+    {
+        this();
+        if (n < 3 || n > 50) {
+            throw new IllegalArgumentException("The size must be between 3 and 50.");
+        }
+        isVisible = false;
+        Random random = new Random();
+        for (String color : SymbolColors.createPalette(n)) {
+            symbols.add(color);
+        }
+        for (int i = 0; i < n; i++) {
+            Wheel wheel = new Wheel(FIRST_WHEEL_X, WHEEL_Y);
+            int symbolIndex = random.nextInt(n);
+            wheel.setSymbol(symbolIndex, symbols.get(symbolIndex));
+            wheels.add(wheel);
+        }
+        if (hasJackpot()) {
+            int nextIndex = (wheels.get(0).getCurrentSymbolIndex() + 1) % n;
+            wheels.get(n - 1).setSymbol(nextIndex, symbols.get(nextIndex));
+        }
+        arrangeWheels();
+        updateJackpotAppearance();
+    }
+    /**
+     * [SM] Inserta una rueda vacía en la posición indicada por el usuario.
+     */
     public void addWheel(int pos)
     {
         if (!ensureRunning()) {
@@ -38,6 +99,9 @@ public class SlotMachine
         updateJackpotAppearance();
         reportSuccessfulOperation();
     }
+    /**
+     * [SM] Quita una rueda existente y borrarepr esentación
+     */
     public void delWheel(int pos)
     {
         if (!ensureRunning()) {
@@ -54,6 +118,9 @@ public class SlotMachine
         updateJackpotAppearance();
         reportSuccessfulOperation();
     }
+    /**
+     * [SM] Intercambia dos objetos Wheel completos dentro de la lista
+     */
     public void swap(int wheel1, int wheel2)
     {
         if (!ensureRunning()) {
@@ -71,6 +138,9 @@ public class SlotMachine
         updateJackpotAppearance();
         reportSuccessfulOperation();
     }
+    /**
+     * [SM] Bloquea una rueda para impedir su rotación
+     */
     public void lock(int wheel)
     {
         if (!ensureRunning()) {
@@ -90,6 +160,9 @@ public class SlotMachine
         selectedWheel.lock();
         reportSuccessfulOperation();
     }
+    /**
+     * [SM] Desbloquea una rueda para permitirle girar de nuevo
+     */
     public void unlock(int wheel)
     {
         if (!ensureRunning()) {
@@ -109,6 +182,10 @@ public class SlotMachine
         selectedWheel.unlock();
         reportSuccessfulOperation();
     }
+    /**
+     * [SM] Inserta un color válido y no repetido de el catálogo
+     * ->W
+     */
     public void addSymbol(int pos, String color)
     {
         String normalizedColor = normalizeColor(color);
@@ -116,15 +193,15 @@ public class SlotMachine
             return;
         }
         if (!isInsertionPosition(pos, symbols.size())) {
-            reportInvalidOperation("The symbol position is invalid.");
+            reportInvalidOperation("The symbol position is invalid");
             return;
         }
         if (!isSupportedSymbolColor(normalizedColor)) {
-            reportInvalidOperation("The symbol color is invalid.");
+            reportInvalidOperation("The symbol color is invalid");
             return;
         }
         if (symbols.contains(normalizedColor)) {
-            reportInvalidOperation("The symbol color already exists.");
+            reportInvalidOperation("The symbol color already exists");
             return;
         }
 
@@ -135,6 +212,9 @@ public class SlotMachine
         }
         reportSuccessfulOperation();
     }
+    /**
+     * [SM] Elimina un color del catálogo y mantiene los índices de las ruedas
+     */
     public void delSymbol(String symbol)
     {
         String normalizedSymbol = normalizeColor(symbol);
@@ -143,7 +223,7 @@ public class SlotMachine
             return;
         }
         if (symbolIndex < 0) {
-            reportInvalidOperation("The symbol does not exist.");
+            reportInvalidOperation("The symbol does not exist");
             return;
         }
 
@@ -154,6 +234,10 @@ public class SlotMachine
         updateJackpotAppearance();
         reportSuccessfulOperation();
     }
+    /**
+     * [SM] Asigna a una rueda un símbolo que ya pertenece al catálogo
+     * ->CI, W
+     */
     public void placeSymbol(int wheel, String symbol)
     {
         String normalizedSymbol = normalizeColor(symbol);
@@ -174,47 +258,57 @@ public class SlotMachine
         updateJackpotAppearance();
         reportSuccessfulOperation();
     }
+    /**
+     * [SM] Pide girar una rueda un solo paso hacia adelante
+     */
     public void spin(int wheel)
     {
         spin(wheel, 1);
     }
+    /**
+     * [SM] Gira una rueda una cantidad de pasos positiva, negativa o cero
+     * ->W.
+     */
     public void spin(int wheel, int steps)
     {
         if (!ensureRunning()) {
             return;
         }
         if (!isWheelPosition(wheel)) {
-            reportInvalidOperation("The wheel position is invalid.");
+            reportInvalidOperation("The wheel position is invalid");
             return;
         }
         Wheel selectedWheel = wheels.get(wheel - 1);
         if (selectedWheel.isLocked()) {
-            reportInvalidOperation("The wheel is locked.");
+            reportInvalidOperation("The wheel is locked");
             return;
         }
         if (symbols.isEmpty() || !selectedWheel.hasSymbol()) {
-            reportInvalidOperation("The wheel does not have a symbol to rotate.");
+            reportInvalidOperation("The wheel does not have a symbol to rotate");
             return;
         }
         rotateWheelBySteps(selectedWheel, steps);
         updateJackpotAppearance();
         reportSuccessfulOperation();
     }
+    /**
+     * [SM] Avanza un paso las ruedas desbloqueadas
+     */
     public void spin()
     {
         if (!ensureRunning()) {
             return;
         }
         if (wheels.isEmpty() || symbols.isEmpty()) {
-            reportInvalidOperation("The machine does not have wheels and symbols to rotate.");
+            reportInvalidOperation("The machine does not have wheels and symbols to rotate");
             return;
         }
         if (!hasUnlockedWheel()) {
-            reportInvalidOperation("The machine does not have an unlocked wheel to rotate.");
+            reportInvalidOperation("The machine does not have an unlocked wheel to rotate");
             return;
         }
         if (!allUnlockedWheelsHaveSymbols()) {
-            reportInvalidOperation("Every unlocked wheel must have a symbol before rotating the machine.");
+            reportInvalidOperation("Every unlocked wheel must have a symbol before rotating the machine");
             return;
         }
 
@@ -226,25 +320,29 @@ public class SlotMachine
         updateJackpotAppearance();
         reportSuccessfulOperation();
     }
+    /**
+     * [SM] Intenta alcanzar una configuración completa después de validar todos elementos
+     * ->W
+     */
     public void spin(String[] setSymbols)
     {
         if (!ensureRunning()) {
             return;
         }
         if (setSymbols == null) {
-            reportInvalidOperation("The requested configuration is null.");
+            reportInvalidOperation("The requested configuration is null");
             return;
         }
         if (wheels.isEmpty()) {
-            reportInvalidOperation("The machine does not have wheels.");
+            reportInvalidOperation("The machine does not have wheels");
             return;
         }
         if (setSymbols.length != wheels.size()) {
-            reportInvalidOperation("The requested configuration has an invalid size.");
+            reportInvalidOperation("The requested configuration has an invalid size");
             return;
         }
         if (symbols.isEmpty()) {
-            reportInvalidOperation("The machine does not have symbols.");
+            reportInvalidOperation("The machine does not have symbols");
             return;
         }
         int[] targetIndexes = new int[setSymbols.length];
@@ -255,20 +353,20 @@ public class SlotMachine
 
             if (targetIndex < 0) {
                 reportInvalidOperation(
-                    "A symbol in the requested configuration does not exist."
+                    "A symbol in the requested configuration does not exist"
                 );
                 return;
             }
             if (!wheel.hasSymbol()) {
                 reportInvalidOperation(
-                    "Every wheel must have a symbol before setting a configuration."
+                    "Every wheel must have a symbol before setting a configuration"
                 );
                 return;
             }
             if (wheel.isLocked()
                 && wheel.getCurrentSymbolIndex() != targetIndex) {
                 reportInvalidOperation(
-                    "A locked wheel cannot reach the requested configuration."
+                    "A locked wheel cannot reach the requested configuration"
                 );
                 return;
             }
@@ -289,10 +387,16 @@ public class SlotMachine
         updateJackpotAppearance();
         reportSuccessfulOperation();
     }
+    /**
+     * [SM] Devuelve una copia del catálogo ordenado de símbolos
+     */
     public String[] symbols()
     {
         return symbols.toArray(new String[0]);
     }
+    /**
+     * [SM] Devuelve el símbolo de cada rueda, en el orden actual de las ruedas
+     */
     public String[] configuration()
     {
         String[] result = new String[wheels.size()];
@@ -304,6 +408,9 @@ public class SlotMachine
         }
         return result;
     }
+    /**
+     * [SM] Cuenta cuántos colores diferentes aparecen en las ruedas configuradas
+     */
     public int distinctSymbols()
     {
         ArrayList<String> distinct = new ArrayList<>();
@@ -314,10 +421,16 @@ public class SlotMachine
         }
         return distinct.size();
     }
+    /**
+     * [SM] Consulta si la configuración actual es ganadora.
+     */
     public boolean isJackpot()
     {
         return hasJackpot();
     }
+    /**
+     * [SM] Muestra las ruedas de una máquina que sigue activa
+     */
     public void makeVisible()
     {
         if (!ensureRunning()) {
@@ -330,6 +443,10 @@ public class SlotMachine
         updateJackpotAppearance();
         reportSuccessfulOperation();
     }
+    /**
+     * [SM] Oculta la máquina conservando sus ruedas, símbolos y configuración
+     *  ->CV, W
+     */
     public void makeInvisible()
     {
         if (!ensureRunning()) {
@@ -343,10 +460,14 @@ public class SlotMachine
         Canvas.closeCanvas();
         reportSuccessfulOperation();
     }
+    /**
+     * [SM] Termina las órdenes del simulador y oculta sus dibujos
+     * ->CV, W
+     */
     public void exit()
     {
         if (!isRunning) {
-            reportInvalidOperation("The simulator has already finished.");
+            reportInvalidOperation("The simulator has already finished");
             return;
         }
         for (Wheel wheel : wheels) {
@@ -357,50 +478,75 @@ public class SlotMachine
         Canvas.closeCanvas();
         reportSuccessfulOperation();
     }
+    /**
+     * [SM] Devuelve si el último comando registrado fue válido
+     */
     public boolean ok()
     {
         return lastOperationSuccessful;
     }
 
+    /**
+     * [SM] Comprueba que la máquina pueda seguir recibiendo órdenes
+     */
     private boolean ensureRunning()
     {
         if (!isRunning) {
-            reportInvalidOperation("The simulator has already finished.");
+            reportInvalidOperation("The simulator has already finished");
             return false;
         }
         return true;
     }
 
+    /**
+     * [SM] Comprueba una posición donde se puede insertar un element  
+    */
     private boolean isInsertionPosition(int pos, int currentSize)
     {
         return pos >= 1 && pos <= currentSize + 1;
     }
 
+    /**
+     * [SM] Comprueba una posición de rueda que ya debe existir.
+     */
     private boolean isWheelPosition(int wheel)
     {
         return wheel >= 1 && wheel <= wheels.size();
     }
 
+    /**
+     * [SM] Normaliza el texto y unifica alias usando SymbolColors.l
+     */
     private String normalizeColor(String color)
     {
-        return color == null ? null : color.trim().toLowerCase();
+        return SymbolColors.normalize(color);
     }
 
+    /**
+     * [SM] Valida nombres básicos y colores, el blanco queda reservado
+     */
     private boolean isSupportedSymbolColor(String color)
     {
-        return "red".equals(color) || "yellow".equals(color)
-            || "blue".equals(color) || "green".equals(color)
-            || "magenta".equals(color) || "black".equals(color);
+        return SymbolColors.isSymbol(color);
     }
 
+    /**
+     * [SM] Distribuye las ruedas en filas de hasta diez y actualiza sus coordenadas
+     * ->W
+     */
     private void arrangeWheels()
     {
         for (int i = 0; i < wheels.size(); i++) {
-            int xPosition = FIRST_WHEEL_X + i * WHEEL_SPACING;
-            wheels.get(i).moveTo(xPosition, WHEEL_Y);
+            int xPosition = FIRST_WHEEL_X + (i % WHEELS_PER_ROW) * WHEEL_SPACING;
+            int yPosition = WHEEL_Y + (i / WHEELS_PER_ROW) * ROW_SPACING;
+            wheels.get(i).moveTo(xPosition, yPosition);
         }
     }
 
+    /**
+     * [SM] Aplica un desplazamiento lógico y actualiza el color correspondiente
+     * ->W
+     */
     private void rotateWheel(Wheel wheel, int steps)
     {
         wheel.rotate(steps, symbols.size());
@@ -408,6 +554,10 @@ public class SlotMachine
         wheel.showSymbol(color);
     }
 
+    /**
+     * [SM] Elige entre giro directo invisible y giro visible
+     * ->CV
+     */
     private void rotateWheelBySteps(Wheel wheel, int steps)
     {
         if (!isVisible || steps == 0) {
@@ -424,6 +574,10 @@ public class SlotMachine
             remainingSteps--;
         }
     }
+    /**
+     * [SM] Verifica que ninguna rueda esté vacía
+     * ->W
+     */
     private boolean allWheelsHaveSymbols()
     {
         for (Wheel wheel : wheels) {
@@ -433,6 +587,10 @@ public class SlotMachine
         }
         return true;
     }
+    /**
+     * [SM] Comprueba si existe al menos una rueda que pueda girar por bloqueo
+     * ->W
+     */
     private boolean hasUnlockedWheel()
     {
         for (Wheel wheel : wheels) {
@@ -443,6 +601,10 @@ public class SlotMachine
         return false;
     }
 
+    /**
+     * [SM] Comprueba que todas las ruedas que participarán en spin() tengan símbolo
+     * ->W
+     */
     private boolean allUnlockedWheelsHaveSymbols()
     {
         for (Wheel wheel : wheels) {
@@ -452,6 +614,11 @@ public class SlotMachine
         }
         return true;
     }
+    /**
+     * [SM] Comprueba que exista una máquina configurada con el mismo símbolo en todas sus
+     * ruedas
+     * ->W
+     */
     private boolean hasJackpot()
     {
         if (wheels.isEmpty() || !allWheelsHaveSymbols()) {
@@ -466,6 +633,10 @@ public class SlotMachine
         }
         return true;
     }
+    /**
+     * [SM] Aplica el estado ganador a los marcos de todas las ruedas
+     * ->W
+     */
     private void updateJackpotAppearance()
     {
         boolean jackpot = hasJackpot();
@@ -473,10 +644,16 @@ public class SlotMachine
             wheel.setJackpotAppearance(jackpot);
         }
     }
+    /**
+     * [SM] Registra que el último comando fue válido
+     */
     private void reportSuccessfulOperation()
     {
         lastOperationSuccessful = true;
     }
+    /**
+     * [SM] Registra un errorsi la máquina está visible informa al usuario
+     */
     private void reportInvalidOperation(String message)
     {
         lastOperationSuccessful = false;
